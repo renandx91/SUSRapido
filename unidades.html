@@ -1,0 +1,485 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Unidades próximas | SUS Rápido</title>
+
+    <link rel="stylesheet" href="unidades.css">
+
+    <!-- Biblioteca do mapa -->
+    <link rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">
+        <span>✚</span> SUS Rápido
+    </div>
+
+    <a href="index.html" class="voltar">Início</a>
+</header>
+
+<main>
+
+    <section class="introducao">
+        <span class="etapa">ETAPA 02 · LOCALIZAÇÃO</span>
+
+        <h1>Encontre atendimento próximo de você</h1>
+
+        <p>
+            Sua triagem foi concluída! Agora vamos localizar
+            unidades de saúde próximas à sua região.
+        </p>
+    </section>
+
+    <section class="localizacao">
+
+        <div class="localizacao-info">
+            <div class="icone">📍</div>
+
+            <div>
+                <h3>Sua localização</h3>
+                <p id="status">
+                    Precisamos da sua localização para buscar unidades próximas.
+                </p>
+            </div>
+        </div>
+
+        <button id="localizarBtn" onclick="buscarLocalizacao()">
+            Encontrar unidades próximas
+        </button>
+
+    </section>
+
+    <section class="mapa-section">
+
+        <div class="titulo-secao">
+            <h2>Mapa da região</h2>
+            <p>Visualize sua localização e as unidades encontradas.</p>
+        </div>
+
+        <div id="mapa">
+            <div class="mapa-placeholder">
+                <span>📍</span>
+                <p>Aguardando sua localização...</p>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="unidades-section">
+
+        <div class="titulo-secao">
+            <h2>Unidades de saúde próximas</h2>
+            <p id="quantidade">
+                As unidades aparecerão após a localização.
+            </p>
+        </div>
+
+        <div id="lista-unidades">
+
+            <div class="mensagem">
+                <span>🏥</span>
+                <h3>Nenhuma busca realizada</h3>
+                <p>
+                    Clique em "Encontrar unidades próximas"
+                    para visualizar os resultados.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="aviso">
+        <strong>Informação importante</strong>
+
+        <p>
+            A localização indica unidades cadastradas no mapa.
+            Os dados podem estar incompletos ou desatualizados.
+            A disponibilidade de atendimento e de serviços
+            precisa ser confirmada diretamente com a unidade
+            ou pela regulação oficial do SUS.
+        </p>
+    </section>
+
+</main>
+
+<footer>
+    <p>© 2026 SUS Rápido - Projeto demonstrativo.</p>
+</footer>
+
+
+<script>
+
+// CONFIGURAÇÃO DO MAPA
+
+let mapa;
+let marcadorUsuario;
+let marcadoresUnidades = [];
+
+
+// INICIAR MAPA
+
+function iniciarMapa(lat, lon) {
+
+    if (!mapa) {
+
+        mapa = L.map('mapa').setView([lat, lon], 14);
+
+        L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                attribution: '&copy; OpenStreetMap'
+            }
+        ).addTo(mapa);
+
+    } else {
+
+        mapa.setView([lat, lon], 14);
+
+    }
+
+    if (marcadorUsuario) {
+        mapa.removeLayer(marcadorUsuario);
+    }
+
+    marcadorUsuario = L.marker([lat, lon])
+        .addTo(mapa)
+        .bindPopup("Você está aqui")
+        .openPopup();
+
+    setTimeout(() => mapa.invalidateSize(), 200);
+}
+
+
+// DISTÂNCIA ENTRE DOIS PONTOS
+
+function calcularDistancia(lat1, lon1, lat2, lon2) {
+
+    const R = 6371;
+
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+
+// IDENTIFICAR TIPO DE UNIDADE
+
+function identificarTipo(tags) {
+
+    const tipo = tags.amenity || tags.healthcare;
+
+    const tipos = {
+        hospital: "Hospital",
+        clinic: "Clínica",
+        doctors: "Consultório médico",
+        doctor: "Consultório médico",
+        health_post: "Posto de saúde",
+        centre: "Centro de saúde",
+        health_centre: "Centro de saúde"
+    };
+
+    return tipos[tipo] || "Unidade de saúde";
+}
+
+
+// BUSCAR UNIDADES NO OPENSTREETMAP
+
+async function buscarUnidades(lat, lon) {
+
+    const lista = document.getElementById("lista-unidades");
+
+    lista.innerHTML = `
+        <div class="mensagem">
+            <h3>Buscando unidades...</h3>
+            <p>Estamos consultando os dados do mapa.</p>
+        </div>
+    `;
+
+    const consulta = `
+        [out:json][timeout:25];
+        (
+          nwr["amenity"~"^(hospital|clinic|doctors)$"]
+            (around:5000,${lat},${lon});
+
+          nwr["healthcare"~"^(hospital|clinic|doctor|centre|health_centre|health_post)$"]
+            (around:5000,${lat},${lon});
+        );
+        out center tags;
+    `;
+
+    try {
+
+        const endpoints = [
+            "https://overpass.kumi.systems/api/interpreter",
+            "https://overpass-api.de/api/interpreter"
+        ];
+
+        let resposta;
+        let dados;
+
+        for (const endpoint of endpoints) {
+            const controlador = new AbortController();
+            const timeout = setTimeout(() => controlador.abort(), 12000);
+
+            try {
+                resposta = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+                    },
+                    body: "data=" + encodeURIComponent(consulta),
+                    signal: controlador.signal
+                });
+
+                if (resposta.ok) {
+                    dados = await resposta.json();
+                    break;
+                }
+            } catch (erroConexao) {
+                continue;
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+
+        if (!dados) {
+            throw new Error("Não foi possível consultar o mapa.");
+        }
+
+        const unidades = dados.elements
+            .map(item => {
+
+                const uLat = item.lat ?? item.center?.lat;
+                const uLon = item.lon ?? item.center?.lon;
+
+                if (uLat == null || uLon == null) return null;
+
+                return {
+                    nome: item.tags.name || "Unidade sem nome informado",
+                    tipo: identificarTipo(item.tags),
+                    lat: uLat,
+                    lon: uLon,
+                    distancia: calcularDistancia(
+                        lat, lon, uLat, uLon
+                    ),
+                    tags: item.tags
+                };
+
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.distancia - b.distancia);
+
+        document.getElementById("quantidade").textContent =
+            unidades.length === 1
+                ? "1 unidade encontrada em um raio de 5 km."
+                : `${unidades.length} unidades encontradas em um raio de 5 km.`;
+
+        exibirUnidades(unidades);
+
+    } catch (erro) {
+
+        lista.innerHTML = `
+            <div class="mensagem">
+                <h3>Não foi possível carregar os resultados</h3>
+                <p>
+                    Verifique sua conexão e tente novamente mais tarde.
+                </p>
+            </div>
+        `;
+
+        document.getElementById("quantidade").textContent =
+            "Busca não concluída.";
+
+    }
+
+}
+
+
+// EXIBIR RESULTADOS
+
+function exibirUnidades(unidades) {
+
+    const lista = document.getElementById("lista-unidades");
+
+    marcadoresUnidades.forEach(m => mapa.removeLayer(m));
+    marcadoresUnidades = [];
+
+    if (unidades.length === 0) {
+
+        lista.innerHTML = `
+            <div class="mensagem">
+                <h3>Nenhuma unidade encontrada</h3>
+                <p>
+                    Não encontramos unidades cadastradas
+                    no mapa dentro de um raio de 5 km.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    lista.innerHTML = "";
+
+    unidades.forEach(unidade => {
+
+        const tags = unidade.tags;
+
+        const servicos = [];
+
+        if (tags.emergency === "yes") {
+            servicos.push("Emergência indicada no mapa");
+        }
+
+        if (tags["healthcare:speciality"]) {
+            servicos.push(
+                "Especialidade: " + tags["healthcare:speciality"]
+            );
+        }
+
+        if (tags.opening_hours) {
+            servicos.push(
+                "Horário informado: " + tags.opening_hours
+            );
+        }
+
+        if (tags.phone) {
+            servicos.push("Telefone: " + tags.phone);
+        }
+
+        const card = document.createElement("article");
+        card.className = "unidade-card";
+
+        const titulo = document.createElement("h3");
+        titulo.textContent = unidade.nome;
+
+        const tipo = document.createElement("span");
+        tipo.className = "tipo";
+        tipo.textContent = unidade.tipo;
+
+        const distancia = document.createElement("p");
+        distancia.className = "distancia";
+        distancia.textContent =
+            "📍 " + unidade.distancia.toFixed(2) + " km de você";
+
+        const descricao = document.createElement("p");
+        descricao.className = "servicos";
+        descricao.textContent = servicos.length
+            ? servicos.join(" • ")
+            : "Serviços não informados no mapa.";
+
+        const link = document.createElement("a");
+        link.className = "direcoes";
+        link.textContent = "Como chegar →";
+        link.href =
+            `https://www.google.com/maps/dir/?api=1&destination=${unidade.lat},${unidade.lon}`;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+
+        card.append(titulo, tipo, distancia, descricao, link);
+        lista.appendChild(card);
+
+        const marcador = L.marker([
+            unidade.lat,
+            unidade.lon
+        ]).addTo(mapa);
+
+        marcador.bindPopup(
+            document.createTextNode(unidade.nome)
+        );
+
+        marcadoresUnidades.push(marcador);
+
+    });
+
+}
+
+
+// SOLICITAR LOCALIZAÇÃO
+
+function buscarLocalizacao() {
+
+    const status = document.getElementById("status");
+    const botao = document.getElementById("localizarBtn");
+
+    if (!navigator.geolocation) {
+
+        status.textContent =
+            "Seu navegador não oferece suporte à localização.";
+
+        return;
+    }
+
+    botao.disabled = true;
+    botao.textContent = "Obtendo localização...";
+
+    status.textContent =
+        "Aguardando autorização para acessar sua localização.";
+
+    navigator.geolocation.getCurrentPosition(
+
+        async function(posicao) {
+
+            const lat = posicao.coords.latitude;
+            const lon = posicao.coords.longitude;
+
+            status.textContent =
+                "Localização identificada com sucesso!";
+
+            iniciarMapa(lat, lon);
+
+            await buscarUnidades(lat, lon);
+
+            botao.disabled = false;
+            botao.textContent = "Atualizar unidades próximas";
+
+        },
+
+        function(erro) {
+
+            const mensagens = {
+                1: "Permita o acesso à localização no navegador.",
+                2: "Não foi possível identificar sua localização.",
+                3: "O tempo para obter sua localização terminou."
+            };
+
+            status.textContent =
+                mensagens[erro.code] || "Erro ao obter localização.";
+
+            botao.disabled = false;
+            botao.textContent = "Tentar novamente";
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 60000
+        }
+
+    );
+
+}
+
+</script>
+
+</body>
+</html>

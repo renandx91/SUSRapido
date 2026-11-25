@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Recuperar senha | SUS Rápido</title>
+
+    <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+
+<header>
+    <div class="logo">
+        <span>✚</span> SUS Rápido
+    </div>
+
+    <a href="login.html" class="voltar">
+        Voltar ao login
+    </a>
+</header>
+
+<main>
+
+    <div class="login-container">
+
+        <div class="icone">🔑</div>
+
+        <h1>Esqueceu sua senha?</h1>
+
+        <p class="subtitulo">
+            Não se preocupe! Informe seu e-mail
+            para iniciar a recuperação da sua conta.
+        </p>
+
+        <form id="recuperarForm">
+
+            <label for="email">E-mail cadastrado</label>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Digite seu e-mail"
+                required
+            >
+
+            <button type="submit">
+                Recuperar minha senha
+            </button>
+
+        </form>
+
+        <div class="cadastro">
+            Lembrou sua senha?
+            <a href="login.html">Voltar ao login</a>
+        </div>
+
+        <div class="aviso">
+            🔒 A recuperação deverá ser feita por um
+            processo seguro de verificação de identidade.
+        </div>
+
+    </div>
+
+</main>
+
+<footer>
+    <p>© 2026 SUS Rápido - Projeto demonstrativo.</p>
+</footer>
+
+<script>
+document.getElementById("recuperarForm")
+.addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    alert("Solicitação demonstrativa! O envio de e-mail ainda não está configurado.");
+
+});
+</script>
+
+</body>
+</html>
