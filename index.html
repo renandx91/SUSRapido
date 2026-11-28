@@ -1,106 +1,85 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="SUS Rápido: uma proposta digital para orientar o cidadão sobre os serviços de saúde.">
-  <title>SUS Rápido | Saúde mais acessível</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | SUS Rápido</title>
+    <link rel="stylesheet" href="login.css">
 </head>
 <body>
-  <header class="header">
-    <a class="brand" href="#inicio" aria-label="SUS Rápido - Início">
-      <span class="brand-icon">✚</span>
-      <span><strong>SUS Rápido</strong><small>SAÚDE INTELIGENTE</small></span>
-    </a>
-    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
-    <nav id="navMenu">
-      <a href="#inicio">Início</a>
-      <a href="#como-funciona">Como funciona</a>
-      <a href="#sobre">Sobre o projeto</a>
-      <button class="nav-cta" onclick="abrirTriagem()">Iniciar triagem</button>
-    </nav>
-  </header>
-
-  <main>
-    <section class="hero" id="inicio">
-      <div class="hero-content">
-        <span class="eyebrow"><span class="dot"></span> SAÚDE MAIS ACESSÍVEL</span>
-        <h1>Não sabe onde buscar <span>atendimento?</span></h1>
-        <p>Conte o que está sentindo e conheça os serviços de saúde que podem ajudar. Mais informação para encontrar o atendimento adequado.</p>
-        <div class="hero-actions">
-          <button class="primary-btn" onclick="abrirTriagem()">Iniciar triagem <span>→</span></button>
-          <a class="secondary-link" href="#como-funciona">Entenda como funciona</a>
+    <header>
+        <div class="logo">
+            <span>✚</span> SUS Rápido
         </div>
-        <p class="hero-note">Uma ferramenta de orientação. Não substitui avaliação médica.</p>
-      </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="art-circle"></div>
-        <div class="medical-card">
-          <div class="medical-symbol">✚</div>
-          <div><strong>Cuidado mais perto</strong><small>Informação e orientação em um só lugar</small></div>
-          <span class="check">✓</span>
+
+        <a href="index.html" class="voltar">
+            Voltar ao início
+        </a>
+    </header>
+
+    <main>
+        <div class="login-container">
+            <div class="icone">
+                ✚
+            </div>
+
+            <h1>Bem-vindo!</h1>
+
+            <p class="subtitulo">
+                Entre na sua conta para continuar.
+            </p>
+
+            <form id="loginForm">
+                <label for="cpf">CPF</label>
+                <input
+                    type="text"
+                    id="cpf"
+                    placeholder="Digite seu CPF"
+                    maxlength="14"
+                    required
+                >
+
+                <label for="senha">Senha</label>
+                <input
+                    type="password"
+                    id="senha"
+                    placeholder="Digite sua senha"
+                    required
+                >
+
+                <div class="opcoes">
+                    <a href="recuperar.html">
+                        Esqueceu sua senha?
+                    </a>
+                </div>
+
+                <button type="submit">
+                    Entrar na conta
+                </button>
+            </form>
+
+            <div class="cadastro">
+                Ainda não possui uma conta?
+                <a href="cadastro.html">Cadastre-se</a>
+            </div>
+
+            <div class="aviso">
+                <span>🔒</span>
+                Seus dados devem ser protegidos.
+            </div>
         </div>
-        <div class="floating-card"><span>⌖</span><div><strong>Serviços próximos</strong><small>UBS e unidades de urgência</small></div></div>
-      </div>
-    </section>
+    </main>
 
-    <section class="steps-section" id="como-funciona">
-      <div class="section-heading">
-        <span class="eyebrow">SIMPLES E DIRETO</span>
-        <h2>Como funciona?</h2>
-        <p>Em poucos passos, o SUS Rápido ajuda você a entender onde procurar atendimento.</p>
-      </div>
-      <div class="steps-grid">
-        <article class="step-card"><div class="step-icon blue">☏</div><span class="step-number">PASSO 01</span><h3>Informe seus sintomas</h3><p>Descreva o que está sentindo por meio de perguntas simples.</p></article>
-        <article class="step-card"><div class="step-icon teal">▤</div><span class="step-number">PASSO 02</span><h3>Responda à triagem</h3><p>O sistema coleta informações para oferecer uma orientação inicial.</p></article>
-        <article class="step-card"><div class="step-icon purple">⌖</div><span class="step-number">PASSO 03</span><h3>Encontre atendimento</h3><p>Consulte unidades de saúde e informações de localização.</p></article>
-      </div>
-    </section>
+    <footer>
+        <p>© 2026 SUS Rápido - Projeto demonstrativo.</p>
+    </footer>
 
-    <section class="about-section" id="sobre">
-      <div class="about-icon">✚</div>
-      <div><span class="eyebrow">NOSSA PROPOSTA</span><h2>Tecnologia a serviço da saúde pública.</h2><p>O SUS Rápido é uma proposta de aplicativo que busca organizar o acesso aos serviços de saúde, oferecendo informações claras e facilitando a localização de unidades próximas.</p></div>
-    </section>
-
-    <section class="disclaimer">
-      <strong>Importante</strong>
-      <p>Este é um protótipo demonstrativo. As perguntas e os resultados não realizam diagnóstico nem classificação clínica oficial. Em caso de emergência ou sintomas graves, procure atendimento de urgência ou ligue 192 (SAMU).</p>
-    </section>
-  
-    <section class="about-section" id="sobre">
-      <div class="about-icon">🛠️</div>
-      <div><span class="eyebrow">DESENVOLVIMENTO</span><h2>Projeto conceitual de tecnologia em saúde.</h2><p>O SUS Rápido é um projeto conceitual desenvolvido por alunos da Escola de Referência em Ensino Médio Dr. Alexandrino da Rocha (EREM), em parceria com o Curso Técnico do SENAC. Durante seu desenvolvimento, foram utilizadas ferramentas de Inteligência Artificial (IA) como apoio à pesquisa, à organização das ideias e à produção do projeto, com o objetivo de explorar soluções digitais que contribuam para melhorar o acesso à informação e aos serviços de saúde, utilizando a tecnologia como ferramenta de apoio à população.</p>
-         <span class="eyebrow">EQUIPE DE DESENVOLVIMENTO</span>
-         <p>Alunos: <strong> Renan Emanuel</strong>, <strong> Lara Melissa</strong>, <strong>Julio César</strong>, <strong>Maria Eduarda</strong>, <strong> Laura Letícia</strong>, <strong> Maria Yasmim</strong>. </p>                                                                  
-        <p>Orientador: <strong>Prof.Gustavson Menezes</strong></p>
-      
-        'falta a foto da equipe de desenvolvimento do projeto SUS Rápido'
-
-      <img src="" alt="Foto da equipe de desenvolvimento do projeto SUS Rápido" class="team-photo">  
-        </div> 
- 
-  </main>
-
-  <footer><a class="brand footer-brand" href="#inicio"><span class="brand-icon">✚</span><strong>SUS Rápido</strong></a><p>Projeto conceitual • Tecnologia a serviço da saúde</p></footer>
-
-  <div class="modal" id="triagemModal" aria-hidden="true">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <button class="close-modal" onclick="fecharTriagem()" aria-label="Fechar">×</button>
-      <div id="triagemConteudo">
-        <span class="eyebrow">ORIENTAÇÃO INICIAL</span>
-        <h2 id="modalTitle">Vamos começar?</h2>
-        <p>Responda às perguntas abaixo. Esta demonstração não substitui uma avaliação feita por um profissional de saúde.</p>
-        <label for="sintomas">O que você está sentindo?</label>
-        <textarea id="sintomas" placeholder="Ex.: dor de cabeça, tosse, febre..."></textarea>
-        <label for="duracao">Há quanto tempo está sentindo isso?</label>
-        <select id="duracao"><option value="">Selecione uma opção</option><option>Começou hoje</option><option>Há alguns dias</option><option>Há uma semana ou mais</option></select>
-        <label class="check-label"><input type="checkbox" id="grave"> Estou com sintomas intensos ou piorando rapidamente.</label>
-        <button class="primary-btn full-btn" onclick="mostrarResultado()">Ver orientação demonstrativa →</button>
-        <p class="form-error" id="formError"></p>
-      </div>
-    </div>
-  </div>
-  <script src="script.js"></script>
+    <script>
+        document.getElementById("loginForm")
+        .addEventListener("submit", function(event) {
+            event.preventDefault();
+            window.location.href = "inicial.html";
+        });
+    </script>
 </body>
 </html>
